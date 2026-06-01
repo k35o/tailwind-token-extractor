@@ -1,0 +1,75 @@
+{
+  "name": "tailwind-token-extractor",
+  "version": "0.0.0",
+  "description": "Extract fully-resolved Tailwind CSS v4 design tokens from a CSS entry point — including @import-ed design systems, Tailwind defaults, var() chains and light/dark — into typed TypeScript.",
+  "keywords": [
+    "codegen",
+    "css",
+    "design-tokens",
+    "tailwind",
+    "tailwindcss",
+    "theme",
+    "tokens",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "k8o",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k35o/tailwind-token-extractor.git"
+  },
+  "bin": {
+    "tailwind-token-extractor": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp test",
+    "typecheck": "tsc --noEmit",
+    "check": "vp check",
+    "check:write": "vp check --fix",
+    "release": "pnpm build && changeset publish"
+  },
+  "dependencies": {
+    "cac": "7.0.0",
+    "postcss": "8.5.8"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "0.7.0",
+    "@changesets/cli": "2.31.0",
+    "@commitlint/cli": "21.0.1",
+    "@commitlint/config-conventional": "21.0.1",
+    "@tailwindcss/node": "4.2.4",
+    "@types/node": "24.10.1",
+    "tailwindcss": "4.2.4",
+    "typescript": "5.9.3",
+    "vite-plus": "0.1.14"
+  },
+  "peerDependencies": {
+    "@tailwindcss/node": ">=4.2.0",
+    "tailwindcss": ">=4.2.0"
+  },
+  "engines": {
+    "node": ">=24.14.1"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
