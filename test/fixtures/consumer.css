@@ -1,0 +1,6 @@
+@import "./design-system.css";
+
+/* A consumer adds its own token; it must win and appear in the output. */
+@theme inline {
+  --color-accent: oklch(0.7 0.2 30);
+}

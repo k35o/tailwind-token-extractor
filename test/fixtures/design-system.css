@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --white: oklch(1 0 0);
+  --teal-500: oklch(0.66 0.165 180);
+  --teal-800: oklch(0.41 0.098 180);
+  --primary: var(--teal-500);
+  --z-modal: 1300;
+}
+
+.dark {
+  --primary: var(--teal-800);
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-white: var(--white);
+  --color-primary: var(--primary);
+  --radius-md: 0.5rem;
+  --text-md: 1rem;
+  --text-md--line-height: calc(1.5 / 1);
+}
