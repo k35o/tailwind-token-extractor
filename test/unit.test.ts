@@ -63,6 +63,32 @@ describe("resolveValue", () => {
     expect(result.resolved).toBe(false);
     expect(result.value).toBe("var(--nope)");
   });
+
+  it("resolves multiple sibling var()s in one value", () => {
+    const map = new Map([
+      ["--a", "1px"],
+      ["--b", "2px"],
+    ]);
+    expect(resolveValue("var(--a) var(--b)", map)).toEqual({ value: "1px 2px", resolved: true });
+  });
+
+  it("resolves nested var() fallbacks", () => {
+    expect(resolveValue("var(--x, var(--y, red))", new Map())).toEqual({
+      value: "red",
+      resolved: true,
+    });
+  });
+
+  it("resolves var()s nested inside another function and preserves the wrapper", () => {
+    const map = new Map([
+      ["--a", "red"],
+      ["--b", "blue"],
+    ]);
+    expect(resolveValue("color-mix(in oklch, var(--a), var(--b))", map)).toEqual({
+      value: "color-mix(in oklch, red, blue)",
+      resolved: true,
+    });
+  });
 });
 
 describe("evalCalcNumber", () => {
@@ -105,6 +131,19 @@ describe("buildDerefMaps", () => {
     expect(maps.light.get("--c")).toBe("blue"); // last-wins within light
     expect(maps.dark.get("--c")).toBe("black"); // dark untouched by the consumer override
     expect(maps.darkOverridden.has("--c")).toBe(true);
+  });
+
+  it("supports an attribute dark selector", () => {
+    const css = `:root { --c: red; } [data-theme="dark"] { --c: black; }`;
+    const maps = buildDerefMaps(css, '[data-theme="dark"]');
+    expect(maps.light.get("--c")).toBe("red");
+    expect(maps.dark.get("--c")).toBe("black");
+  });
+
+  it("ignores declarations inside conditional at-rules", () => {
+    const css = `:root { --c: red; } @media (max-width: 10px) { :root { --c: blue; } }`;
+    const maps = buildDerefMaps(css, ".dark");
+    expect(maps.light.get("--c")).toBe("red"); // the @media override is not collected
   });
 });
 

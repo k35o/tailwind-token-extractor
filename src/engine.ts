@@ -37,8 +37,9 @@ type TailwindNodeModule = {
 };
 
 async function importTailwindNode(): Promise<TailwindNodeModule> {
+  let mod: Record<string, unknown>;
   try {
-    return (await import("@tailwindcss/node")) as unknown as TailwindNodeModule;
+    mod = (await import("@tailwindcss/node")) as unknown as Record<string, unknown>;
   } catch (cause) {
     throw new Error(
       "Cannot load '@tailwindcss/node'. Install tailwindcss (>=4.2.0) in the target project; " +
@@ -46,6 +47,17 @@ async function importTailwindNode(): Promise<TailwindNodeModule> {
       { cause },
     );
   }
+  // Fail fast (exit 2 via EngineShapeError) if the unstable internals we rely on are gone.
+  const missing = (["__unstable__loadDesignSystem", "compile"] as const).filter(
+    (name) => typeof mod[name] !== "function",
+  );
+  if (missing.length > 0) {
+    throw new EngineShapeError(
+      `'@tailwindcss/node' is missing expected exports (${missing.join(", ")}); ` +
+        "the installed Tailwind version is incompatible with tailwind-token-extractor.",
+    );
+  }
+  return mod as unknown as TailwindNodeModule;
 }
 
 /**
@@ -104,8 +116,11 @@ export function classify(cssVar: string): Classified | null {
     if (name === ns) return { namespace: ns, key: "" };
     if (name.startsWith(`${ns}-`)) {
       const rest = name.slice(ns.length + 1);
-      const [key, modifier] = rest.split("--");
-      return { namespace: ns, key: key ?? rest, modifier };
+      // Split only on the FIRST `--`, so modifiers that themselves contain `--`
+      // (e.g. a hypothetical `--text-md--foo--bar`) keep their full name.
+      const sep = rest.indexOf("--");
+      if (sep === -1) return { namespace: ns, key: rest };
+      return { namespace: ns, key: rest.slice(0, sep), modifier: rest.slice(sep + 2) };
     }
   }
   // Unknown namespace: fall back to the leading segment so nothing is dropped.
