@@ -69,6 +69,11 @@ describe("extractTokens (imported-CSS case)", () => {
     expect(tokens.meta.dependencies.length).toBeGreaterThan(0);
   });
 
+  it("records a cwd-relative source path (no machine-specific absolute path)", () => {
+    expect(tokens.meta.source.startsWith("/")).toBe(false);
+    expect(tokens.meta.source).toContain("consumer.css");
+  });
+
   it("emits valid-looking TypeScript", () => {
     const code = emitTypeScript(tokens);
     expect(code).toContain("export const tokens = {");

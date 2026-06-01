@@ -1,3 +1,4 @@
+import { relative, resolve } from "node:path";
 import { runEngine, assertEngineShape, classify, THEME_OPTION } from "./engine.ts";
 import { buildDerefMaps, resolveValue, coerceNumeric, evalCalcNumber } from "./literals.ts";
 import type {
@@ -155,7 +156,8 @@ export async function extractTokens(options: ExtractOptions): Promise<ExtractedT
     theme,
     vars,
     meta: {
-      source: entry,
+      // Record a cwd-relative path so the emitted file is stable across machines/CI.
+      source: relative(process.cwd(), resolve(entry)) || entry,
       tailwindVersion: engine.tailwindVersion,
       unresolved,
       dependencies: engine.dependencies,
