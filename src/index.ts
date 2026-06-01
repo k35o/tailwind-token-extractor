@@ -29,7 +29,12 @@ export async function generate(
 export async function watch(
   options: GenerateOptions,
   onRebuild?: (tokens: ExtractedTokens) => void,
+  onError?: (error: unknown) => void,
 ): Promise<{ close: () => void }> {
+  const reportError =
+    onError ??
+    ((error: unknown) =>
+      process.stderr.write(`tailwind-token-extractor watch: ${String(error)}\n`));
   const watchers = new Map<string, ReturnType<typeof fsWatch>>();
   let timer: NodeJS.Timeout | null = null;
   let closed = false;
@@ -56,7 +61,9 @@ export async function watch(
           file,
           fsWatch(file, () => {
             if (timer) clearTimeout(timer);
-            timer = setTimeout(() => void rebuild(), 50);
+            timer = setTimeout(() => {
+              rebuild().catch(reportError);
+            }, 50);
           }),
         );
       } catch {

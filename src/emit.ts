@@ -105,8 +105,11 @@ export function emitTypeScript(tokens: ExtractedTokens, options: EmitOptions = {
   lines.push("export type ThemeNamespace = keyof typeof tokens.theme;");
   lines.push("export type VarName = keyof typeof tokens.vars;");
   for (const ns of objectNamespaces) {
+    const typeName = `${pascalCase(ns)}Token`;
+    // Skip namespaces that don't yield a valid TS identifier (e.g. starts with a digit).
+    if (!IDENT_RE.test(typeName)) continue;
     const access = IDENT_RE.test(ns) ? `.${ns}` : `[${quoteString(ns)}]`;
-    lines.push(`export type ${pascalCase(ns)}Token = keyof typeof tokens.theme${access};`);
+    lines.push(`export type ${typeName} = keyof typeof tokens.theme${access};`);
   }
   lines.push("");
 

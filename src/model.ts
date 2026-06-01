@@ -106,15 +106,21 @@ export async function extractTokens(options: ExtractOptions): Promise<ExtractedT
   }
 
   // --- raw var layer (non-@theme :root/.dark declarations) -----------------
+  // Walk the union of light + dark keys so vars defined ONLY under the dark
+  // selector still surface.
   const vars: RawVar[] = [];
-  for (const cssVar of maps.light.keys()) {
+  const rawNames = new Set<string>([...maps.light.keys(), ...maps.dark.keys()]);
+  for (const cssVar of rawNames) {
     if (themeVarNames.has(cssVar)) continue;
-    const reference = maps.light.get(cssVar) as string;
+    const lightRef = maps.light.get(cssVar);
+    const darkRef = maps.dark.get(cssVar);
+    // Fall back across modes when a var is defined in only one of them.
     const l = resolveVars
-      ? resolveValue(reference, maps.light)
-      : { value: reference, resolved: true };
-    const darkRef = maps.dark.get(cssVar) ?? reference;
-    const d = resolveVars ? resolveValue(darkRef, maps.dark) : { value: darkRef, resolved: true };
+      ? resolveValue(lightRef ?? (darkRef as string), maps.light)
+      : { value: lightRef ?? (darkRef as string), resolved: true };
+    const d = resolveVars
+      ? resolveValue(darkRef ?? (lightRef as string), maps.dark)
+      : { value: darkRef ?? (lightRef as string), resolved: true };
     const resolved = l.resolved && d.resolved;
     vars.push({
       name: cssVar.replace(/^--/, ""),
@@ -126,15 +132,22 @@ export async function extractTokens(options: ExtractOptions): Promise<ExtractedT
     if (!resolved) unresolved.push(cssVar);
   }
 
-  // Fold a numeric line-height modifier into a `lineHeightNumber` companion.
+  // Fold a numeric line-height modifier into a `lineHeightNumber` companion,
+  // evaluating light and dark independently.
+  const toNumber = (v: TokenValue): number | null =>
+    typeof v === "number" ? v : evalCalcNumber(v);
   for (const tokens of Object.values(theme)) {
     for (const token of tokens) {
       const lh = token.modifiers?.["line-height"];
-      if (lh && typeof lh.light === "string") {
-        const n = evalCalcNumber(lh.light);
-        if (n != null)
-          token.modifiers!["line-height-number"] = { light: n, dark: n, resolved: true };
-      }
+      if (!lh) continue;
+      const lightNum = toNumber(lh.light);
+      const darkNum = toNumber(lh.dark);
+      if (lightNum == null && darkNum == null) continue;
+      token.modifiers!["line-height-number"] = {
+        light: lightNum ?? lh.light,
+        dark: darkNum ?? lh.dark,
+        resolved: lh.resolved,
+      };
     }
   }
 
