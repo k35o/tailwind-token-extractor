@@ -1,5 +1,11 @@
 # tailwind-token-extractor
 
+## 0.1.1
+
+### Patch Changes
+
+- [#3](https://github.com/k35o/tailwind-token-extractor/pull/3) [`f4dccd0`](https://github.com/k35o/tailwind-token-extractor/commit/f4dccd0fe606f4b31109be9d8bda392fb3b9aff3) Thanks [@k35o](https://github.com/k35o)! - Emit `meta.source` as a cwd-relative path instead of an absolute one, so the generated file stays stable across machines and CI (avoids spurious diffs when re-running the extractor).
+
 ## 0.1.0
 
 ### Minor Changes
