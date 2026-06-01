@@ -10,6 +10,7 @@
 
 .dark {
   --primary: var(--teal-800);
+  --dark-only: oklch(0.2 0 0);
 }
 
 @theme inline {

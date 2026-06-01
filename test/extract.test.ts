@@ -1,4 +1,8 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { extractTokens } from "../src/model.ts";
 import { emitTypeScript } from "../src/index.ts";
@@ -54,6 +58,12 @@ describe("extractTokens (imported-CSS case)", () => {
     expect(primaryVar?.dark).toBe("oklch(0.41 0.098 180)");
   });
 
+  it("surfaces a var defined only under the dark selector", () => {
+    const darkOnly = tokens.vars.find((v) => v.name === "dark-only");
+    expect(darkOnly).toBeDefined();
+    expect(darkOnly?.dark).toBe("oklch(0.2 0 0)");
+  });
+
   it("reports the Tailwind version and the @import dependency graph", () => {
     expect(typeof tokens.meta.tailwindVersion).toBe("string");
     expect(tokens.meta.dependencies.length).toBeGreaterThan(0);
@@ -63,5 +73,30 @@ describe("extractTokens (imported-CSS case)", () => {
     const code = emitTypeScript(tokens);
     expect(code).toContain("export const tokens = {");
     expect(code).toContain("export type ColorToken =");
+  });
+
+  it("emits TypeScript that type-checks under --strict", () => {
+    const code = emitTypeScript(tokens);
+    const dir = mkdtempSync(join(tmpdir(), "twte-emit-"));
+    const file = join(dir, "tokens.ts");
+    writeFileSync(file, code);
+    const tsc = createRequire(import.meta.url).resolve("typescript/bin/tsc");
+    // execFileSync throws if tsc exits non-zero (i.e. the generated file has type errors).
+    execFileSync(
+      process.execPath,
+      [
+        tsc,
+        "--noEmit",
+        "--strict",
+        "--target",
+        "ES2022",
+        "--moduleResolution",
+        "bundler",
+        "--module",
+        "ESNext",
+        file,
+      ],
+      { stdio: "pipe" },
+    );
   });
 });
