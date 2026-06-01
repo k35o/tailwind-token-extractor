@@ -11,7 +11,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: pnpm ci
+      run: pnpm install --frozen-lockfile
 
     - name: Build
       shell: bash
