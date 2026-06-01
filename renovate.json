@@ -12,10 +12,6 @@
       "groupName": "tailwindcss dependencies"
     },
     {
-      "matchPackageNames": ["/^@commitlint/"],
-      "groupName": "commitlint dependencies"
-    },
-    {
       "matchPackageNames": ["/^@changesets/"],
       "groupName": "changesets dependencies"
     },
