@@ -57,6 +57,14 @@ export type RawVar = {
   light: TokenValue;
   dark: TokenValue;
   resolved: boolean;
+  /**
+   * Immediate `var()` target (name without `--`) per mode, when this var is
+   * defined as a single `var(--x)`. `null` for a mode whose value is a literal.
+   * Present only when at least one mode references another var — it preserves
+   * the symbolic relationship (`fg-base` -> `gray-900`/`gray-50`) that the
+   * resolved `light`/`dark` literals discard.
+   */
+  ref?: { light: string | null; dark: string | null };
 };
 
 /** The structured result of {@link extractTokens}. */

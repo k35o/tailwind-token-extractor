@@ -58,6 +58,16 @@ describe("extractTokens (imported-CSS case)", () => {
     expect(primaryVar?.dark).toBe("oklch(0.41 0.098 180)");
   });
 
+  it("preserves the immediate var() ref per mode for aliased vars", () => {
+    const primaryVar = tokens.vars.find((v) => v.name === "primary");
+    expect(primaryVar?.ref).toEqual({ light: "teal-500", dark: "teal-800" });
+  });
+
+  it("attaches no ref to vars whose value is a literal", () => {
+    expect(tokens.vars.find((v) => v.name === "z-modal")?.ref).toBeUndefined();
+    expect(tokens.vars.find((v) => v.name === "teal-500")?.ref).toBeUndefined();
+  });
+
   it("surfaces a var defined only under the dark selector", () => {
     const darkOnly = tokens.vars.find((v) => v.name === "dark-only");
     expect(darkOnly).toBeDefined();

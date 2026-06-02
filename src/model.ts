@@ -1,6 +1,12 @@
 import { relative, resolve } from "node:path";
 import { runEngine, assertEngineShape, classify, THEME_OPTION } from "./engine.ts";
-import { buildDerefMaps, resolveValue, coerceNumeric, evalCalcNumber } from "./literals.ts";
+import {
+  buildDerefMaps,
+  resolveValue,
+  coerceNumeric,
+  evalCalcNumber,
+  immediateVarRef,
+} from "./literals.ts";
 import type {
   ExtractOptions,
   ExtractedTokens,
@@ -123,13 +129,21 @@ export async function extractTokens(options: ExtractOptions): Promise<ExtractedT
       ? resolveValue(darkRef ?? (lightRef as string), maps.dark)
       : { value: darkRef ?? (lightRef as string), resolved: true };
     const resolved = l.resolved && d.resolved;
-    vars.push({
+    // Capture the immediate ref from the SAME source string used for value
+    // resolution above, so single-mode vars fall back across modes identically.
+    const lightRefName = immediateVarRef(lightRef ?? (darkRef as string));
+    const darkRefName = immediateVarRef(darkRef ?? (lightRef as string));
+    const rawVar: RawVar = {
       name: cssVar.replace(/^--/, ""),
       cssVar,
       light: coerceNumeric(l.value),
       dark: coerceNumeric(d.value),
       resolved,
-    });
+    };
+    if (lightRefName !== null || darkRefName !== null) {
+      rawVar.ref = { light: lightRefName, dark: darkRefName };
+    }
+    vars.push(rawVar);
     if (!resolved) unresolved.push(cssVar);
   }
 

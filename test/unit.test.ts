@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { classify } from "../src/engine.ts";
-import { resolveValue, evalCalcNumber, coerceNumeric, buildDerefMaps } from "../src/literals.ts";
+import {
+  resolveValue,
+  evalCalcNumber,
+  coerceNumeric,
+  buildDerefMaps,
+  immediateVarRef,
+} from "../src/literals.ts";
 import { emitTypeScript } from "../src/emit.ts";
 import type { ExtractedTokens } from "../src/types.ts";
 
@@ -91,6 +97,25 @@ describe("resolveValue", () => {
   });
 });
 
+describe("immediateVarRef", () => {
+  it("returns the target name of a lone var()", () => {
+    expect(immediateVarRef("var(--gray-900)")).toBe("gray-900");
+  });
+
+  it("returns the immediate target even when a fallback is present", () => {
+    expect(immediateVarRef("var(--gray-900, white)")).toBe("gray-900");
+  });
+
+  it("returns null for a literal value", () => {
+    expect(immediateVarRef("oklch(0.5 0 0)")).toBeNull();
+    expect(immediateVarRef("1300")).toBeNull();
+  });
+
+  it("returns null when the value is not a single var()", () => {
+    expect(immediateVarRef("var(--a) var(--b)")).toBeNull();
+  });
+});
+
 describe("evalCalcNumber", () => {
   it("evaluates a numeric calc", () => {
     expect(evalCalcNumber("calc(1.5 / 1)")).toBe(1.5);
@@ -175,7 +200,17 @@ describe("emitTypeScript", () => {
         },
       ],
     },
-    vars: [{ name: "z-modal", cssVar: "--z-modal", light: 1300, dark: 1300, resolved: true }],
+    vars: [
+      { name: "z-modal", cssVar: "--z-modal", light: 1300, dark: 1300, resolved: true },
+      {
+        name: "primary",
+        cssVar: "--primary",
+        light: "oklch(0.66 0.165 180)",
+        dark: "oklch(0.41 0.098 180)",
+        resolved: true,
+        ref: { light: "teal-500", dark: "teal-800" },
+      },
+    ],
     meta: { source: "x.css", tailwindVersion: "4.2.4", unresolved: [], dependencies: [] },
   };
 
@@ -187,5 +222,13 @@ describe("emitTypeScript", () => {
     expect(code).toContain("light:"); // color stays light/dark
     expect(code).toContain("export type ColorToken = keyof typeof tokens.theme.color;");
     expect(code).toContain("z-modal");
+  });
+
+  it("emits a refs map of per-mode var() targets and a RefName type", () => {
+    const code = emitTypeScript(tokens);
+    expect(code).toContain("refs:");
+    expect(code).toContain("light: 'teal-500'");
+    expect(code).toContain("dark: 'teal-800'");
+    expect(code).toContain("export type RefName = keyof typeof tokens.refs;");
   });
 });

@@ -85,15 +85,24 @@ export const tokens = {
     "fg-base": { light: "oklch(0.25 0.0015 235)", dark: "oklch(0.975 0.001 235)" },
     "z-overlay": 1000,
   },
+  refs: {
+    // the symbolic var() target each aliased var points at, per mode
+    "fg-base": { light: "gray-900", dark: "gray-50" },
+  },
 } as const;
 
 export type ColorToken = keyof typeof tokens.theme.color;
 export type VarName = keyof typeof tokens.vars;
+export type RefName = keyof typeof tokens.refs;
 ```
 
 - A namespace with a single bare token (`--spacing`) collapses to a scalar.
 - A token that changes in dark mode becomes `{ light, dark }`; otherwise it stays a scalar.
 - Purely numeric values (`z-index`, unit-less `line-height`) are emitted as `number`.
+- `refs` records the immediate `var()` target of each var defined as `var(--x)`,
+  per light/dark mode — the symbolic link (`fg-base` → `gray-900`/`gray-50`) that
+  the resolved `vars` literals discard. Literals and one-mode-only references are
+  omitted; entries are always a `{ light, dark }` mapping.
 
 ## Scope (v1)
 
