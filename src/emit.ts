@@ -87,6 +87,16 @@ export function emitTypeScript(tokens: ExtractedTokens, options: EmitOptions = {
     varsObj[v.name] = v.light !== v.dark ? { light: v.light, dark: v.dark } : v.light;
   }
 
+  // Symbolic refs: the immediate `var()` target per mode for vars defined as
+  // `var(--x)`. Always rendered as a `{ light, dark }` mapping (never collapsed
+  // to a scalar) since the value IS the light/dark relationship. A var that
+  // references another var in only one mode is skipped — a ref needs both sides.
+  const refsObj: { [name: string]: Jsonish } = {};
+  for (const v of tokens.vars) {
+    if (!v.ref || v.ref.light === null || v.ref.dark === null) continue;
+    refsObj[v.name] = { light: v.ref.light, dark: v.ref.dark };
+  }
+
   const metaObj: Jsonish = {
     source: tokens.meta.source,
     tailwindVersion: tokens.meta.tailwindVersion ?? "unknown",
@@ -96,7 +106,9 @@ export function emitTypeScript(tokens: ExtractedTokens, options: EmitOptions = {
   const suffix = asConst ? " as const" : "";
   const lines: string[] = [header, ""];
 
-  lines.push(`export const tokens = ${serialize({ theme: themeObj, vars: varsObj }, 0)}${suffix};`);
+  lines.push(
+    `export const tokens = ${serialize({ theme: themeObj, vars: varsObj, refs: refsObj }, 0)}${suffix};`,
+  );
   lines.push("");
   lines.push(`export const meta = ${serialize(metaObj, 0)}${suffix};`);
   lines.push("");
@@ -104,6 +116,7 @@ export function emitTypeScript(tokens: ExtractedTokens, options: EmitOptions = {
   // Derived key-union types for autocomplete.
   lines.push("export type ThemeNamespace = keyof typeof tokens.theme;");
   lines.push("export type VarName = keyof typeof tokens.vars;");
+  lines.push("export type RefName = keyof typeof tokens.refs;");
   for (const ns of objectNamespaces) {
     const typeName = `${pascalCase(ns)}Token`;
     // Skip namespaces that don't yield a valid TS identifier (e.g. starts with a digit).

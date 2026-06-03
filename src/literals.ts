@@ -159,6 +159,23 @@ export function resolveValue(input: string, map: Map<string, string>): ResolveRe
   return { value: out, resolved: !unresolved && !hasVar };
 }
 
+/**
+ * Return the immediate `var()` target name (without the leading `--`) when
+ * `reference` is a single `var(--x[, fallback])`, else `null`. Preserves the
+ * symbolic relationship (`--fg-base: var(--gray-900)` -> `"gray-900"`) that full
+ * value resolution would otherwise flatten into a literal. A value that is a
+ * literal, or that combines multiple tokens (`var(--a) var(--b)`), yields `null`.
+ */
+export function immediateVarRef(reference: string): string | null {
+  const nodes = valueParser(reference).nodes.filter((n) => n.type !== "space");
+  if (nodes.length !== 1) return null;
+  const node = nodes[0];
+  if (!node || node.type !== "function" || node.value !== "var") return null;
+  const name = node.nodes.find((n) => n.type === "word")?.value;
+  if (!name || !name.startsWith("--")) return null;
+  return name.slice(2);
+}
+
 const NUMERIC_RE = /^-?(?:\d+\.?\d*|\.\d+)$/;
 const SAFE_CALC_RE = /^[\d\s.+\-*/()]+$/;
 
