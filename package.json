@@ -1,6 +1,6 @@
 {
   "name": "tailwind-token-extractor",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Extract fully-resolved Tailwind CSS v4 design tokens from a CSS entry point — including @import-ed design systems, Tailwind defaults, var() chains and light/dark — into typed TypeScript.",
   "keywords": [
     "codegen",
