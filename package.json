@@ -51,17 +51,17 @@
   },
   "dependencies": {
     "cac": "7.0.0",
-    "postcss": "8.5.10",
+    "postcss": "8.5.15",
     "postcss-value-parser": "4.2.0"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.7.0",
     "@changesets/cli": "2.31.0",
     "@tailwindcss/node": "4.2.4",
-    "@types/node": "24.10.1",
+    "@types/node": "24.12.4",
     "tailwindcss": "4.2.4",
     "typescript": "5.9.3",
-    "vite-plus": "0.1.17"
+    "vite-plus": "0.1.24"
   },
   "peerDependencies": {
     "@tailwindcss/node": ">=4.2.0 <5",
