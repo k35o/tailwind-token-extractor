@@ -46,8 +46,7 @@
     "test": "vp test",
     "typecheck": "tsc --noEmit",
     "check": "vp check",
-    "check:write": "vp check --fix",
-    "release": "pnpm build && changeset publish"
+    "check:write": "vp check --fix"
   },
   "dependencies": {
     "cac": "7.0.0",
@@ -55,8 +54,6 @@
     "postcss-value-parser": "4.2.0"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "0.7.0",
-    "@changesets/cli": "2.31.0",
     "@tailwindcss/node": "4.3.2",
     "@types/node": "24.13.3",
     "tailwindcss": "4.3.2",
@@ -70,5 +67,5 @@
   "engines": {
     "node": ">=24.14.1"
   },
-  "packageManager": "pnpm@11.11.0"
+  "packageManager": "pnpm@11.15.1"
 }
