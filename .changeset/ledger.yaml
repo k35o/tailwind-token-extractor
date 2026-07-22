@@ -1,0 +1,4 @@
+tailwind-token-extractor@0.2.1:
+  dir: ""
+  intents:
+    - switch-release-automation
