@@ -58,7 +58,7 @@
     "@types/node": "24.13.3",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
-    "vite-plus": "0.2.4"
+    "vite-plus": "0.2.8"
   },
   "peerDependencies": {
     "@tailwindcss/node": ">=4.2.0 <5",
