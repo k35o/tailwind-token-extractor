@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { extractTokens } from "../src/model.ts";
 import { emitTypeScript } from "../src/index.ts";
 import type { ExtractedTokens, ThemeToken } from "../src/types.ts";
@@ -95,7 +95,10 @@ describe("extractTokens (imported-CSS case)", () => {
     const dir = mkdtempSync(join(tmpdir(), "twte-emit-"));
     const file = join(dir, "tokens.ts");
     writeFileSync(file, code);
-    const tsc = createRequire(import.meta.url).resolve("typescript/bin/tsc");
+    // Resolve via package.json: TypeScript 7 dropped ./bin/tsc from its exports map,
+    // so the subpath is no longer resolvable directly.
+    const tsPkg = createRequire(import.meta.url).resolve("typescript/package.json");
+    const tsc = join(dirname(tsPkg), "bin", "tsc");
     // execFileSync throws if tsc exits non-zero (i.e. the generated file has type errors).
     execFileSync(
       process.execPath,
@@ -111,7 +114,9 @@ describe("extractTokens (imported-CSS case)", () => {
         "ESNext",
         file,
       ],
-      { stdio: "pipe" },
+      // Run from the temp dir: TypeScript 7 errors (TS5112) when a tsconfig.json is
+      // discoverable from the cwd while files are passed on the command line.
+      { cwd: dir, stdio: "pipe" },
     );
   });
 });
