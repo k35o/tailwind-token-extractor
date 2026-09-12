@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "cac": "7.0.0",
-    "postcss": "8.5.26",
+    "postcss": "8.5.28",
     "postcss-value-parser": "4.2.0"
   },
   "devDependencies": {
