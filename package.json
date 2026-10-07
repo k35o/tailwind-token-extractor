@@ -50,12 +50,12 @@
   },
   "dependencies": {
     "cac": "7.0.0",
-    "postcss": "8.5.26",
+    "postcss": "8.5.28",
     "postcss-value-parser": "4.2.0"
   },
   "devDependencies": {
     "@tailwindcss/node": "4.3.3",
-    "@types/node": "24.13.3",
+    "@types/node": "24.19.0",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite-plus": "1.0.0"
