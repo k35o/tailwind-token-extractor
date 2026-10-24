@@ -49,13 +49,13 @@
     "check:write": "vp check --fix"
   },
   "dependencies": {
-    "cac": "7.0.0",
-    "postcss": "8.5.28",
+    "cac": "7.1.0",
+    "postcss": "8.5.30",
     "postcss-value-parser": "4.2.0"
   },
   "devDependencies": {
     "@tailwindcss/node": "4.3.3",
-    "@types/node": "24.19.0",
+    "@types/node": "24.19.2",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite-plus": "1.0.0"
